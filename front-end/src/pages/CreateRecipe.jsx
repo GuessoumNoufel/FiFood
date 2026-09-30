@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import toast from "react-hot-toast";
 import { createRecipe } from "../API/recipes";
-import { BackHome } from "./Discover";
+import BackHome from "../components/BackHome";
 
 const Page = styled.div`
   max-width: 82rem;

@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import {
   discoverMeals,
   searchMealsByName,
   filterMealsByArea,
-} from "../api/meals";
+} from "../API/meals";
 import RecipeCard from "../components/RecipeCard";
 import Pagination from "../components/pagination";
 import SearchBar from "../components/SearchBar";
 import discoverCover from "../assets/discover-cover.webp";
 import { useLikedRecipes } from "../hooks/useLikedRecipes";
 import LoadingPage from "../components/LoadingPage";
+import BackHome from "../components/BackHome";
+import { isCacheFresh } from "../utils/cache";
 
 const SearchBarOnDiscover = styled(SearchBar)`
   margin-bottom: 0;
@@ -31,21 +33,6 @@ const MineHeading = styled.h1`
   margin: 0;
 `;
 
-export const BackHome = styled(Link)`
-  font-family: "Fraunces", Georgia, serif;
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #db5f00;
-  text-transform: upperCase;
-  display: flex;
-  gap: 4px;
-  cursor: pointer;
-  display: inline-flex;
-  &:hover {
-    color: #e8590c;
-    text-shadow: 1px 1px 12px #ff620dae;
-  }
-`;
 const fakeRating = () => (Math.random() * (4.9 - 4.0) + 4.0).toFixed(1);
 const LIMIT = 15;
 const DISCOVER_CACHE_TTL = 30_000;
@@ -89,7 +76,7 @@ function Discover() {
   const cacheKey = JSON.stringify([search ?? "", area ?? "", page]);
   const cachedResults = discoverCache.get(cacheKey);
   const initialResults =
-    cachedResults && Date.now() - cachedResults.cachedAt < DISCOVER_CACHE_TTL
+    isCacheFresh(cachedResults, DISCOVER_CACHE_TTL)
       ? cachedResults
       : null;
   const [meals, setMeals] = useState(initialResults?.meals ?? []);
@@ -132,7 +119,8 @@ function Discover() {
   };
   useEffect(() => {
     const cached = discoverCache.get(cacheKey);
-    if (cached && Date.now() - cached.cachedAt < DISCOVER_CACHE_TTL) {
+    if (isCacheFresh(cached, DISCOVER_CACHE_TTL)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate this URL key from its in-memory cache.
       setMeals(cached.meals);
       setResults(cached.results);
       setTotalResults(cached.totalResults);

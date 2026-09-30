@@ -5,19 +5,27 @@ const { notifyFollowersOfNewRecipe } = require("../utils/newsletterService");
 const { createRecipeNotifications } = require("../utils/inAppNotifications");
 
 exports.getAllRecipes = catchAsync(async (req, res, next) => {
-  const queryObj = { ...req.query };
-  const excludeFields = ["sort", "page", "limit", "fields"];
-  excludeFields.forEach((el) => delete queryObj[el]);
+  const allowedFilters = ["title", "category", "area", "createdBy", "difficulty"];
+  const queryObj = {};
+  for (const field of allowedFilters) {
+    const value = req.query[field];
+    if (typeof value === "string" && value.length <= 200) queryObj[field] = value;
+  }
 
   let query = Recipe.find(queryObj);
+  const sortFields = new Set(["createdAt", "averageRating", "likesCount", "time", "title"]);
+  const sortValue = typeof req.query.sort === "string" ? req.query.sort : "-createdAt";
+  const sortField = sortValue.startsWith("-") ? sortValue.slice(1) : sortValue;
+  query = query.sort(sortFields.has(sortField) ? sortValue : "-createdAt");
 
-  if (req.query.sort) {
-    query = query.sort(req.query.sort);
-  } else {
-    query = query.sort("-createdAt");
-  }
-  const page = req.query.page * 1 || 1;
-  const limit = req.query.limit * 1 || 10;
+  const parsedPage = Number.parseInt(req.query.page, 10);
+  const parsedLimit = Number.parseInt(req.query.limit, 10);
+  const page = Number.isSafeInteger(parsedPage) && parsedPage > 0
+    ? Math.min(parsedPage, 10_000)
+    : 1;
+  const limit = Number.isSafeInteger(parsedLimit) && parsedLimit > 0
+    ? Math.min(parsedLimit, 100)
+    : 10;
   const skip = (page - 1) * limit;
 
   query = query.skip(skip).limit(limit);
@@ -80,7 +88,15 @@ exports.createRecipe = catchAsync(async (req, res, next) => {
     servings: req.body.servings,
     difficulty: req.body.difficulty,
     instructions: req.body.instructions,
-    ingredients: JSON.parse(req.body.ingredients),
+    ingredients: (() => {
+      try {
+        const ingredients = JSON.parse(req.body.ingredients);
+        if (!Array.isArray(ingredients)) throw new Error("invalid list");
+        return ingredients;
+      } catch {
+        throw new AppError("Ingredients must be a valid list", 400);
+      }
+    })(),
     createdBy: req.user.id,
   });
   void notifyFollowersOfNewRecipe(newRecipe);
@@ -172,7 +188,8 @@ exports.rateRecipe = catchAsync(async (req, res, next) => {
 
   const { value } = req.body;
 
-  if (!value || value < 1 || value > 5) {
+  const numericValue = Number(value);
+  if (!Number.isInteger(numericValue) || numericValue < 1 || numericValue > 5) {
     return next(new AppError("Please provide a rating between 1 and 5", 400));
   }
 
@@ -181,9 +198,9 @@ exports.rateRecipe = catchAsync(async (req, res, next) => {
   );
 
   if (existingRating) {
-    existingRating.value = value;
+    existingRating.value = numericValue;
   } else {
-    recipe.ratings.push({ value, user: req.user.id });
+    recipe.ratings.push({ value: numericValue, user: req.user.id });
   }
 
   const total = recipe.ratings.reduce((sum, r) => sum + r.value, 0);

@@ -77,6 +77,7 @@ const userSchema = mongoose.Schema({
   followingCount: { type: Number, default: 0 },
 
   passwordChangedAt: Date,
+  tokenVersion: { type: Number, default: 0, select: false },
   passwordResetToken: String,
   created_at: {
     type: Date,

@@ -29,28 +29,36 @@ exports.toggleLike = catchAsync(async function (req, res, next) {
     if (!recipe) {
       return next(new AppError("no recipe with this id", 404));
     }
-    likedRecipe = await Like.create({
-      isLocalRecipe: true,
-      user: userId,
-      localRecipeId: recipe._id,
-    });
+    try {
+      likedRecipe = await Like.create({
+        isLocalRecipe: true,
+        user: userId,
+        localRecipeId: recipe._id,
+      });
+    } catch (error) {
+      if (error.code !== 11000) throw error;
+    }
     message = "added to likes";
   } else {
     const recipe = await fetchMealById(recipeId);
     if (!recipe) {
       return next(new AppError("no recipe with this id", 404));
     }
-    likedRecipe = await Like.create({
-      isLocalRecipe: false,
-      user: userId,
-      mealDBId: recipeId,
-      title: recipe.title,
-      image: recipe.image,
-      category: recipe.category,
-      area: recipe.area,
-      instructions: recipe.instructions,
-      ingredients: recipe.ingredients,
-    });
+    try {
+      likedRecipe = await Like.create({
+        isLocalRecipe: false,
+        user: userId,
+        mealDBId: recipeId,
+        title: recipe.title,
+        image: recipe.image,
+        category: recipe.category,
+        area: recipe.area,
+        instructions: recipe.instructions,
+        ingredients: recipe.ingredients,
+      });
+    } catch (error) {
+      if (error.code !== 11000) throw error;
+    }
     message = "added to likes";
   }
 

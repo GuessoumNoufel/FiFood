@@ -20,6 +20,9 @@ export const updateMe = (data) =>
 
 export const getMe = () => api.get("/users/me").then((res) => res.data);
 
+export const exchangeGoogleCode = (code) =>
+  api.post("/users/auth/google/exchange", { code }).then((res) => res.data);
+
 export const changePassword = (passwordData) =>
   api.patch("/users/updatePassword", passwordData).then((res) => res.data);
 

@@ -6,9 +6,36 @@ const passport = require("./utils/passportConfig");
 const newsletterRouter = require("./routes/newsletterRoutes");
 
 const app = express();
-app.use(express.json());
+if (process.env.TRUST_PROXY) {
+  const proxySetting = process.env.TRUST_PROXY;
+  app.set(
+    "trust proxy",
+    proxySetting === "true"
+      ? 1
+      : Number.isFinite(Number(proxySetting))
+        ? Number(proxySetting)
+        : proxySetting,
+  );
+}
+app.use(express.json({ limit: "100kb" }));
 const cors = require("cors");
-app.use(cors());
+const allowedOrigins = new Set([
+  ...(process.env.NODE_ENV === "production" ? [] : ["http://localhost:5173"]),
+  ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL.replace(/\/$/, "")] : []),
+  ...(process.env.CORS_ORIGINS || "").split(",").map((origin) => origin.trim()).filter(Boolean),
+]);
+app.use(cors({
+  origin(origin, callback) {
+    callback(null, !origin || allowedOrigins.has(origin));
+  },
+  credentials: true,
+}));
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
 app.use(passport.initialize());
 
 const userRoutes = require("./routes/userRoutes");

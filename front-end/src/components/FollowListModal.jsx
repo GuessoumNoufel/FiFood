@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import toast from "react-hot-toast";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
 import { getUserFollowers, getUserFollowing, toggleFollow } from "../API/users";
 
 const Overlay = styled.div`
@@ -169,6 +169,7 @@ function FollowListModal({ userId, type, onClose }) {
 
   useEffect(() => {
     let isCurrent = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- clear the old list while the selected user's list loads.
     setLoading(true);
     setFailed(false);
     const request = type === "followers" ? getUserFollowers : getUserFollowing;

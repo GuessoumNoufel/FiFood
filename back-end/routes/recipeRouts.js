@@ -3,6 +3,7 @@ const express = require("express");
 const recipeController = require("../controllers/recipeController");
 const authController = require("../controllers/authController");
 const { uploadRecipeImage } = require("../utils/multerConfig");
+const rateLimit = require("../utils/rateLimit");
 
 const router = express.Router();
 
@@ -10,6 +11,11 @@ router.get("/", recipeController.getAllRecipes);
 router.get("/:id", recipeController.getRecipe);
 
 router.use(authController.protect);
+router.use(rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  message: "Too many recipe changes. Try again shortly.",
+}));
 
 // router.post("/createRecipe", recipeController.createRecipe);
 router.post("/createRecipe", uploadRecipeImage, recipeController.createRecipe);

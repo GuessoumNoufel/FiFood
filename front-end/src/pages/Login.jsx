@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 // import styled from "styled-components";
 import toast from "react-hot-toast";
 import { login as loginApi } from "../API/auth";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
 import GoogleButton from "../components/GoogleButton";
 
 import {
@@ -23,8 +23,8 @@ import {
 } from "../components/AuthLayout";
 
 function Login() {
-  const [email, setEmail] = useState("mido@example.com");
-  const [password, setPassword] = useState("password1234");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ function Login() {
     setSubmitting(true);
     try {
       const res = await loginApi(email, password);
-      login(res.data.user, res.token);
+      login(res.data.user);
       toast.success("Welcome back!");
       navigate("/");
     } catch (err) {

@@ -585,6 +585,7 @@ function Categories() {
 
   useEffect(() => {
     if (!category) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clear the previous category when the URL has no category.
       setMeals([]);
       setTotalResults(0);
       setLoading(false);

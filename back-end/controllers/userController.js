@@ -5,6 +5,7 @@ const AppError = require("./../utils/AppError");
 const catchAsync = require("./../utils/catchAsync");
 const Recipe = require("../models/recipeModel");
 const mongoose = require("mongoose");
+const { setAuthCookie } = require("../utils/authCookie");
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   if (req.body.password || req.body.confirmPassword) {
@@ -41,7 +42,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   // console.log("filterd body :", filteredBody);
 
   res.status(200).json({ status: "success", data: updatedUser });
-  console.log(updatedUser);
 });
 
 exports.updatePassword = catchAsync(async function (req, res, next) {
@@ -68,7 +68,7 @@ exports.updatePassword = catchAsync(async function (req, res, next) {
     );
   }
 
-  const user = await User.findById({ _id: req.user._id }).select("+password");
+  const user = await User.findById({ _id: req.user._id }).select("+password +tokenVersion");
   if (!user.password) {
     return next(
       new AppError(
@@ -86,26 +86,31 @@ exports.updatePassword = catchAsync(async function (req, res, next) {
   }
   user.password = req.body.newPassword;
   user.confirmPassword = req.body.newPasswordConfirm;
+  user.tokenVersion = (user.tokenVersion ?? 0) + 1;
   await user.save();
 
-  const token = JWT.sign({ id: user._id }, process.env.JWT_SECRET, {
+  const token = JWT.sign({ id: user._id, tokenVersion: user.tokenVersion }, process.env.JWT_SECRET, {
     expiresIn: "30d",
   });
+  setAuthCookie(res, token);
   res.status(200).json({
     status: "success",
     message: "Password updated successfully",
-    token,
   });
 });
 
 exports.getUserProfile = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.params.id).select(
-    "name bio photo coverImage country followersCount followingCount createdAt",
+    "name bio photo coverImage country followers following followersCount followingCount createdAt",
   );
   if (!user) return next(new AppError("No user found with that ID", 404));
 
   const recipesCount = await Recipe.countDocuments({ createdBy: user._id });
   const profile = user.toObject();
+  profile.followersCount = user.followers.length;
+  profile.followingCount = user.following.length;
+  delete profile.followers;
+  delete profile.following;
   profile.amFollowing = Boolean(
     req.user?.following.some((followingId) =>
       followingId.equals(user._id),
@@ -167,43 +172,67 @@ exports.toggleFollow = catchAsync(async (req, res, next) => {
     return next(new AppError("You cannot follow yourself", 400));
   }
 
-  const target = await User.findById(targetId);
-  if (!target) return next(new AppError("No user found with that ID", 404));
-
-  const alreadyFollowing = target.followers.some(
-    (f) => f.toString() === req.user.id,
-  );
-  let updatedTarget;
-
-  if (alreadyFollowing) {
-    updatedTarget = await User.findByIdAndUpdate(targetId, {
-      $pull: { followers: req.user._id },
-      $inc: { followersCount: -1 },
-    }, { new: true });
-    await User.findByIdAndUpdate(req.user.id, {
-      $pull: { following: target._id },
-      $inc: { followingCount: -1 },
-    });
-  } else {
-    updatedTarget = await User.findByIdAndUpdate(targetId, {
-      $addToSet: { followers: req.user._id },
-      $inc: { followersCount: 1 },
-    }, { new: true });
-    await User.findByIdAndUpdate(req.user.id, {
-      $addToSet: { following: target._id },
-      $inc: { followingCount: 1 },
-    });
+  if (!mongoose.Types.ObjectId.isValid(targetId)) {
+    return next(new AppError("No user found with that ID", 404));
   }
 
-  res.status(200).json({
-    status: "success",
-    following: !alreadyFollowing,
-    followersCount: updatedTarget.followersCount,
-  });
+  const session = await mongoose.startSession();
+  let result;
+  try {
+    await session.withTransaction(async () => {
+      const [actor, target] = await Promise.all([
+        User.findById(req.user._id).select("following").session(session),
+        User.findById(targetId).select("followers").session(session),
+      ]);
+      if (!target) throw new AppError("No user found with that ID", 404);
+
+      const following = !target.followers.some((id) => id.equals(actor._id));
+      const updateMembership = (field, countField, memberId, include) => [
+        {
+          $set: {
+            [field]: include
+              ? { $setUnion: [{ $ifNull: [`$${field}`, []] }, [memberId]] }
+              : {
+                  $filter: {
+                    input: { $ifNull: [`$${field}`, []] },
+                    as: "member",
+                    cond: { $ne: ["$$member", memberId] },
+                  },
+                },
+          },
+        },
+        { $set: { [countField]: { $size: `$${field}` } } },
+      ];
+
+      const updatedTarget = await User.findByIdAndUpdate(
+        target._id,
+        updateMembership("followers", "followersCount", actor._id, following),
+        { new: true, session },
+      );
+      await User.findByIdAndUpdate(
+        actor._id,
+        updateMembership("following", "followingCount", target._id, following),
+        { session },
+      );
+      result = {
+        status: "success",
+        following,
+        followersCount: updatedTarget.followersCount,
+      };
+    });
+  } finally {
+    await session.endSession();
+  }
+
+  res.status(200).json(result);
 });
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const { sort = "recipes", filter = "all", search, page = 1 } = req.query;
+  const { sort = "recipes", filter = "all", search } = req.query;
+  const requestedPage = Number.parseInt(req.query.page, 10);
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0
+    ? Math.min(requestedPage, 10_000)
+    : 1;
   const limit = 10;
   const skip = (page - 1) * limit;
 
@@ -217,8 +246,9 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
     query._id = { $in: me.followers };
   }
 
-  if (search) {
-    query.name = { $regex: search, $options: "i" };
+  if (typeof search === "string" && search.trim()) {
+    const safeSearch = search.trim().slice(0, 100).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    query.name = { $regex: safeSearch, $options: "i" };
   }
 
   // recipesCount is a denormalized field and can be stale for recipes created
@@ -243,6 +273,8 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
           recipesCount: {
             $ifNull: [{ $arrayElemAt: ["$recipeStats.count", 0] }, 0],
           },
+          followersCount: { $size: { $ifNull: ["$followers", []] } },
+          followingCount: { $size: { $ifNull: ["$following", []] } },
         },
       },
       {
@@ -316,20 +348,3 @@ exports.getFeaturedUsers = catchAsync(async (req, res, next) => {
   });
 });
 
-// fetch("http://localhost:3000/api/v1/users/login", {
-//   method: "POST",
-//   headers: { "Content-Type": "application/json" },
-//   body: JSON.stringify({
-//     email: "mido@example.com",
-//     password: "password1234",
-//   }),
-// })
-//   .then((res) => res.json())
-//   .then((data) => {
-//     console.log(data);
-//     localStorage.setItem(
-//       "token",
-//       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhYjBmMWIxNmYzOTYzOWFhOTMwY2Q0OCIsImlhdCI6MTc4OTk4MTEwNiwiZXhwIjoxNzkyNTczMTA2fQ.8RPK6AFutqK7IzHKbZnKawMcXgdd14650b_OmPQEaRI",
-//     );
-//     localStorage.setItem("user", JSON.stringify(data.data.user));
-//   });

@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import toast from "react-hot-toast";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
 import { changePassword } from "../API/users";
 
 const Page = styled.main`
@@ -123,12 +123,11 @@ function ChangePassword() {
 
     setSaving(true);
     try {
-      const result = await changePassword({
+      await changePassword({
         password: currentPassword,
         newPassword,
         newPasswordConfirm,
       });
-      if (result.token) localStorage.setItem("token", result.token);
       toast.success("Your password has been changed");
       navigate(`/profile/${user._id}`);
     } catch (error) {

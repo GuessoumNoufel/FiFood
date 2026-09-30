@@ -20,7 +20,7 @@ export const getPopularRecipes = () => {
 };
 
 export const getAllLocalRecipes = () => {
-  return api.get("/recipes", { params: { limit: 1000 } });
+  return api.get("/recipes", { params: { limit: 100 } });
 };
 
 // export const getPopularRecipesx = () => {

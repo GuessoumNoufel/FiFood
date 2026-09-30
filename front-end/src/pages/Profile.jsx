@@ -2,10 +2,11 @@ import { useState, useEffect, useContext, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import styled from "styled-components";
 import toast from "react-hot-toast";
-import { getUserProfile, getUserRecipes, toggleFollow } from "../api/users";
-import { getFavorites } from "../api/likes";
+import { getUserProfile, getUserRecipes, toggleFollow } from "../API/users";
+import { getFavorites } from "../API/likes";
 import RecipeCard from "../components/RecipeCard";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
+import { isCacheFresh } from "../utils/cache";
 import { useLikedRecipes } from "../hooks/useLikedRecipes";
 import LoadingPage from "../components/LoadingPage";
 import FollowListModal from "../components/FollowListModal";
@@ -242,7 +243,7 @@ function Profile() {
   const profileCacheKey = `${id}:${me?._id ?? "public"}`;
   const cachedProfile = profileCache.get(profileCacheKey);
   const cachedData =
-    cachedProfile && Date.now() - cachedProfile.cachedAt < PROFILE_CACHE_TTL
+    isCacheFresh(cachedProfile, PROFILE_CACHE_TTL)
       ? cachedProfile
       : null;
 
@@ -266,7 +267,8 @@ function Profile() {
 
   useEffect(() => {
     const cached = profileCache.get(profileCacheKey);
-    if (cached && Date.now() - cached.cachedAt < PROFILE_CACHE_TTL) {
+    if (isCacheFresh(cached, PROFILE_CACHE_TTL)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate the newly selected profile from its cache.
       setProfile(cached.profile);
       setRecipesCount(cached.recipesCount);
       setRecipes(cached.recipes);

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
 import { getNotifications, markNotificationRead } from "../API/notifications";
 import logo from "../assets/logo2.png";
 
@@ -391,16 +391,15 @@ function Navbar() {
   const [notifications, setNotifications] = useState([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const notificationRef = useRef(null);
   const accountRef = useRef(null);
   const navRef = useRef(null);
 
+  const userId = user?._id;
   useEffect(() => {
     let isCurrent = true;
-    if (!user) {
-      setNotifications([]);
-      return undefined;
-    }
+    if (!userId) return undefined;
 
     getNotifications()
       .then((res) => {
@@ -411,7 +410,7 @@ function Navbar() {
     return () => {
       isCurrent = false;
     };
-  }, [user?._id]);
+  }, [userId]);
 
   useEffect(() => {
     const closeOnOutsideClick = (event) => {
@@ -448,7 +447,6 @@ function Navbar() {
   };
 
   const unreadCount = notifications.filter((item) => !item.readAt).length;
-  const [accountOpen, setAccountOpen] = useState(false);
 
   return (
     <Bar ref={navRef}>

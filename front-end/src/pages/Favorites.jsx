@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo, useContext } from "react";
 import styled from "styled-components";
-import { getFavorites, toggleLike } from "../api/likes";
+import { getFavorites, toggleLike } from "../API/likes";
 import toast from "react-hot-toast";
 import RecipeCard from "../components/RecipeCard";
 import ConfirmModal from "../components/ConfirmModel";
 import LoadingPage from "../components/LoadingPage";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
+import { isCacheFresh } from "../utils/cache";
 
 const fakeRating = () => (Math.random() * (4.9 - 4.0) + 4.0).toFixed(1);
 const FAVORITES_CACHE_TTL = 30_000;
@@ -97,7 +98,7 @@ function Favorites() {
   const cacheKey = user?._id ?? "anonymous";
   const cachedFavorites = favoritesCache.get(cacheKey);
   const initialFavorites =
-    cachedFavorites && Date.now() - cachedFavorites.cachedAt < FAVORITES_CACHE_TTL
+    isCacheFresh(cachedFavorites, FAVORITES_CACHE_TTL)
       ? cachedFavorites.data
       : null;
   const [favorites, setFavorites] = useState(initialFavorites ?? []);
@@ -107,7 +108,8 @@ function Favorites() {
 
   useEffect(() => {
     const cached = favoritesCache.get(cacheKey);
-    if (cached && Date.now() - cached.cachedAt < FAVORITES_CACHE_TTL) {
+    if (isCacheFresh(cached, FAVORITES_CACHE_TTL)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate favorites from the fresh per-user cache.
       setFavorites(cached.data);
       setLoading(false);
       return;
@@ -151,7 +153,7 @@ function Favorites() {
       });
       setPendingRemoveId(null);
       toast.success("Removed from favorites");
-    } catch (err) {
+    } catch {
       toast.error("Could not remove recipe");
     }
   };

@@ -2,8 +2,8 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import toast from "react-hot-toast";
-import { getUserProfile, updateMe } from "../api/users";
-import { AuthContext } from "../context/AuthContext";
+import { getUserProfile, updateMe } from "../API/users";
+import { AuthContext } from "../context/authContext";
 import { countries } from "../data/countries";
 
 const BIO_LIMIT = 250;
@@ -251,7 +251,7 @@ function EditProfile() {
     else if (removeCover) formData.append("removeCoverImage", "true");
     try {
       const res = await updateMe(formData);
-      login(res.data, localStorage.getItem("token"));
+      login(res.data);
       toast.success("Profile updated!");
       navigate(`/profile/${user._id}`);
     } catch (err) {

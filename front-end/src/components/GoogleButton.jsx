@@ -1,5 +1,7 @@
 import styled from "styled-components";
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
+
 const GoogleButtonCon = styled.a`
   display: flex;
   align-items: center;
@@ -31,7 +33,7 @@ const GoogleButtonCon = styled.a`
 // usage:
 function GoogleButton() {
   return (
-    <GoogleButtonCon href="http://localhost:3000/api/v1/users/auth/google">
+    <GoogleButtonCon href={`${apiBaseUrl.replace(/\/$/, "")}/users/auth/google`}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"

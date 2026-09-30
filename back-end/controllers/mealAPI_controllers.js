@@ -111,13 +111,6 @@ exports.getMealByName = catchAsync(async function (req, res, next) {
   const page = req.query.page * 1 || 1;
   const limit = 15;
   const skip = (page - 1) * limit;
-  console.log("query:", req.query);
-  console.log("params:", req.params);
-  console.log("---------------------");
-  console.log("url", req.url);
-  console.log("query:", req.query);
-  console.log("params:", req.params);
-  console.log("page raw:", req.query.page, "parsed:", page);
   const pageResults = meals.slice(skip, skip + limit);
 
   res.status(200).json({

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import styled from "styled-components";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
 import {
   getComments,
   deleteComment,
@@ -49,6 +49,7 @@ export default function CommentsSection({ recipeId, refetch, allRatings }) {
 
   useEffect(() => {
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- show the loading state while comments for this recipe are fetched.
     setLoading(true);
     getComments(recipeId)
       .then((res) => {

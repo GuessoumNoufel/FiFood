@@ -30,10 +30,17 @@ const recipeSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+recipeSchema.pre("save", function (next) {
+  this.$locals.wasNewRecipe = this.isNew;
+  next();
+});
+
 recipeSchema.post("save", async function (doc) {
-  await mongoose.model("User").findByIdAndUpdate(doc.createdBy, {
-    $inc: { recipesCount: 1 },
-  });
+  if (doc.$locals.wasNewRecipe) {
+    await mongoose.model("User").findByIdAndUpdate(doc.createdBy, {
+      $inc: { recipesCount: 1 },
+    });
+  }
 });
 
 recipeSchema.post("findOneAndDelete", async function (doc) {

@@ -13,7 +13,16 @@ const likeSchema = new mongoose.Schema({
   instructions: String,
   ingredients: [String],
   createdAt: { type: Date, default: Date.now },
-});
+}, { autoIndex: false });
+
+likeSchema.index(
+  { user: 1, localRecipeId: 1 },
+  { unique: true, partialFilterExpression: { isLocalRecipe: true } },
+);
+likeSchema.index(
+  { user: 1, mealDBId: 1 },
+  { unique: true, partialFilterExpression: { isLocalRecipe: false } },
+);
 
 // recipeSnapshot: {
 //   mealDBId: String, // present only if it came from TheMealDB; absent for local recipes

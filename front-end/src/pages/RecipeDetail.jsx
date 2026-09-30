@@ -1,18 +1,18 @@
 import { useState, useCallback, useEffect, useContext } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import styled from "styled-components";
-import { getRecipe } from "../api/recipes";
-import { getMealById } from "../api/meals";
-// import { toggleLike } from "../api/likes";
+import { getRecipe } from "../API/recipes";
+import { getMealById } from "../API/meals";
+// import { toggleLike } from "../API/likes";
 import { isLocalRecipeId } from "../utils/isLocalId";
 // import { isLocalRecipeId } from "../utils/isLocalId";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
 import toast from "react-hot-toast";
 import { useLikedRecipes } from "../hooks/useLikedRecipes";
 import { getFavorites } from "../API/likes";
 import RatingInput from "../components/RatingInput";
 import { rateRecipe, deleteRecipe } from "../API/recipes";
-import { createComment, getComments, updateComment } from "../API/comments";
+import { createComment, getComments } from "../API/comments";
 import CommentsSection from "../components/commentsSection";
 import LoadingPage from "../components/LoadingPage";
 import ConfirmModal from "../components/ConfirmModel";
@@ -228,13 +228,11 @@ function RecipeDetail() {
   const { user } = useContext(AuthContext);
 
   const [recipe, setRecipe] = useState(null);
-  const [isLocal, setIsLocal] = useState(false);
+  const isLocal = isLocalRecipeId(id);
   const [loading, setLoading] = useState(true);
-  const [existingRating, setExistingRating] = useState(null);
   const [existingComment, setExistingComment] = useState(null);
   const { likedIds, setLikedIds, handleToggleLike } = useLikedRecipes();
   const liked = likedIds.has(id);
-  const [allRatings, setAllRatings] = useState();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const isOwner =
     isLocal &&
@@ -242,8 +240,8 @@ function RecipeDetail() {
     String(recipe?.createdBy?._id ?? recipe?.createdBy) === String(user._id);
   // fetch the recipe itself (local vs external)
   useEffect(() => {
-    const local = isLocalRecipeId(id);
-    setIsLocal(local);
+    const local = isLocal;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset the visible loading state for the next recipe id.
     setLoading(true);
 
     const fetchRecipe = local ? getRecipe(id) : getMealById(id);
@@ -256,12 +254,9 @@ function RecipeDetail() {
           data.description = pickGenericDescription();
         }
         setRecipe(data);
-        // allRatings = zrecipe.ratings;
-        // setAllRatings(recipe.ratings);
-        setAllRatings(data.ratings ?? []);
       })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, isLocal]);
 
   // seed liked status from the user's real favorites, if logged in
   useEffect(() => {
@@ -275,7 +270,11 @@ function RecipeDetail() {
         setLikedIds(new Set(ids));
       })
       .catch(() => {});
-  }, [user]);
+  }, [user, setLikedIds]);
+
+  const existingRating = recipe?.ratings?.find(
+    (rating) => String(rating.user?._id ?? rating.user) === String(user?._id),
+  ) ?? null;
 
   const handleLike = () => handleToggleLike(id);
 
@@ -283,7 +282,7 @@ function RecipeDetail() {
     try {
       await navigator.clipboard.writeText(window.location.href);
       toast.success("Link copied to clipboard!");
-    } catch (err) {
+    } catch {
       toast.error("Couldn't copy link!");
     }
   };
@@ -308,23 +307,10 @@ function RecipeDetail() {
       // re-fetch the recipe here to show the updated averageRating
       const newRecipe = await getRecipe(id);
       setRecipe(newRecipe.data);
-    } catch (err) {
+    } catch {
       toast.error("Could not save your rating");
     }
   };
-
-  useEffect(() => {
-    if (!user || !recipe) {
-      setExistingRating(null);
-      return;
-    }
-    const found = recipe.ratings?.find(
-      (el) => String(el.user?._id ?? el.user) === String(user._id),
-    );
-    const find = recipe.ratings;
-    setAllRatings(find);
-    setExistingRating(found ?? null);
-  }, [user, recipe]);
 
   const fetchComments = useCallback(async () => {
     if (!user) {
@@ -348,6 +334,7 @@ function RecipeDetail() {
   }, [id, user]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch current user's comment when recipe or auth changes.
     fetchComments();
   }, [fetchComments, recipe]);
 
@@ -607,7 +594,7 @@ function RecipeDetail() {
         // onEditComment={onEditComment}
         recipeId={id}
         refetch={handleRatingSubmit}
-        allRatings={allRatings}
+        allRatings={recipe.ratings ?? []}
       />
       {confirmDelete && (
         <ConfirmModal

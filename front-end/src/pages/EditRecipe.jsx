@@ -3,7 +3,7 @@ import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import toast from "react-hot-toast";
 import { getRecipe, updateRecipe } from "../API/recipes";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
 import LoadingPage from "../components/LoadingPage";
 
 const Page = styled.main`

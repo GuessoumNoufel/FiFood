@@ -5,8 +5,12 @@ const { isLocalRecipeId } = require("../utils/isLocalId");
 const Recipe = require("../models/recipeModel");
 
 exports.createComment = catchAsync(async function (req, res, next) {
+  const text = typeof req.body.text === "string" ? req.body.text.trim() : "";
+  if (!text || text.length > 2000) {
+    return next(new AppError("Comment must be between 1 and 2000 characters", 400));
+  }
   const newComment = await Comment.create({
-    text: req.body.text,
+    text,
     user: req.user._id,
     recipeId: req.params.recipeId,
   });
@@ -35,6 +39,10 @@ exports.getCommentsForRecipe = catchAsync(async function (req, res, next) {
 });
 
 exports.updateComment = catchAsync(async function (req, res, next) {
+  const text = typeof req.body.text === "string" ? req.body.text.trim() : "";
+  if (!text || text.length > 2000) {
+    return next(new AppError("Comment must be between 1 and 2000 characters", 400));
+  }
   const comment = await Comment.findById(req.params.id);
 
   if (!comment) {
@@ -47,7 +55,7 @@ exports.updateComment = catchAsync(async function (req, res, next) {
 
   const updatedComment = await Comment.findByIdAndUpdate(
     req.params.id,
-    { text: req.body.text },
+    { text },
     { new: true, runValidators: true },
   );
 
@@ -83,29 +91,33 @@ exports.deleteComment = catchAsync(async function (req, res, next) {
   });
 });
 exports.toggleCommentLike = catchAsync(async function (req, res, next) {
-  const comment = await Comment.findById(req.params.id);
-
-  if (!comment) {
-    return next(new AppError("No comment found with that ID", 404));
-  }
-
-  const alreadyLiked = comment.likes.some(
-    (userId) => userId.toString() === req.user._id.toString(),
+  const userId = req.user._id;
+  const updatedComment = await Comment.findByIdAndUpdate(
+    req.params.id,
+    [
+      {
+        $set: {
+          likes: {
+            $cond: [
+              { $in: [userId, { $ifNull: ["$likes", []] }] },
+              {
+                $filter: {
+                  input: { $ifNull: ["$likes", []] },
+                  as: "liker",
+                  cond: { $ne: ["$$liker", userId] },
+                },
+              },
+              { $setUnion: [{ $ifNull: ["$likes", []] }, [userId]] },
+            ],
+          },
+        },
+      },
+      { $set: { likesCount: { $size: "$likes" } } },
+    ],
+    { new: true },
   );
-
-  let updatedComment;
-  if (alreadyLiked) {
-    updatedComment = await Comment.findByIdAndUpdate(
-      req.params.id,
-      { $pull: { likes: req.user._id }, $inc: { likesCount: -1 } },
-      { new: true },
-    );
-  } else {
-    updatedComment = await Comment.findByIdAndUpdate(
-      req.params.id,
-      { $addToSet: { likes: req.user._id }, $inc: { likesCount: 1 } },
-      { new: true },
-    );
+  if (!updatedComment) {
+    return next(new AppError("No comment found with that ID", 404));
   }
 
   res.status(200).json({

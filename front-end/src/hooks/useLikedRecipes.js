@@ -1,6 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { toggleLike } from "../api/likes";
+import { toggleLike } from "../API/likes";
 
 export function useLikedRecipes(initialLikedIds = []) {
   const [likedIds, setLikedIds] = useState(new Set(initialLikedIds));
@@ -20,7 +20,7 @@ export function useLikedRecipes(initialLikedIds = []) {
       toast.success(
         wasLiked ? "Removed from favorites" : "Added to favorites!",
       );
-    } catch (err) {
+    } catch {
       toast.error("Please log in to save recipes");
     }
   };
