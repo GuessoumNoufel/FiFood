@@ -1,0 +1,48 @@
+//   "Algeria",
+//   "Egypt",
+//   "Morocco",
+//   "Tunisia",
+//   "France",
+//   "Italy",
+//   "Spain",
+//   "Germany",
+//   "United Kingdom",
+//   "United States",
+//   "Canada",
+//   "Mexico",
+//   "Brazil",
+//   "Argentina",
+//   "India",
+//   "China",
+//   "Japan",
+//   "South Korea",
+//   "Turkey",
+//   "Greece",
+//   "Portugal",
+//   "Netherlands",
+//   "Belgium",
+//   "Sweden",
+//   "Vietnam",
+//   "Thailand",
+//   "Malaysia",
+//   "Indonesia",
+//   "Nigeria",
+//   "Kenya",
+//   "South Africa",
+//   "Saudi Arabia",
+//   "United Arab Emirates",
+//   "Jordan",
+//   "Lebanon",
+//   "Iran",
+//   "Pakistan",
+//   "Russia",
+//   "Poland",
+//   "Ukraine",
+// ];
+
+// const { getNames } = require("country-list");
+
+import { getNames } from "country-list";
+
+export const countries = getNames();
+//  const countries = getNames()
