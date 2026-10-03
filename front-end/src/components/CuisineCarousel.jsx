@@ -11,7 +11,7 @@ import greekImg from "../assets/cuisine-imgs/Greek.png";
 import thaiImg from "../assets/cuisine-imgs/Thai.png";
 import spanishImg from "../assets/cuisine-imgs/Spanish.png";
 import moroccanImg from "../assets/cuisine-imgs/Moroccan.png";
-import egyptianImg from "../assets/cuisine-imgs/egyptian.png";
+import egyptianImg from "../assets/cuisine-imgs/Egyptian.png";
 
 const cuisines = [
   { area: "Italian", image: italianImg },
