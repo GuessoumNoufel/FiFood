@@ -6,7 +6,7 @@ import { getMealById } from "../API/meals";
 // import { toggleLike } from "../API/likes";
 import { isLocalRecipeId } from "../utils/isLocalId";
 // import { isLocalRecipeId } from "../utils/isLocalId";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { useLikedRecipes } from "../hooks/useLikedRecipes";
 import { getFavorites } from "../API/likes";
@@ -83,7 +83,9 @@ const EditRecipeButton = styled(Link)`
   font-size: 1.3rem;
   font-weight: 600;
   text-decoration: none;
-  &:hover { background: #f5efe4; }
+  &:hover {
+    background: #f5efe4;
+  }
 `;
 
 const DeleteRecipeButton = styled.button`
@@ -95,7 +97,9 @@ const DeleteRecipeButton = styled.button`
   font-size: 1.3rem;
   font-weight: 600;
   cursor: pointer;
-  &:hover { background: #fff0eb; }
+  &:hover {
+    background: #fff0eb;
+  }
 `;
 
 const MainGrid = styled.div`
@@ -272,9 +276,10 @@ function RecipeDetail() {
       .catch(() => {});
   }, [user, setLikedIds]);
 
-  const existingRating = recipe?.ratings?.find(
-    (rating) => String(rating.user?._id ?? rating.user) === String(user?._id),
-  ) ?? null;
+  const existingRating =
+    recipe?.ratings?.find(
+      (rating) => String(rating.user?._id ?? rating.user) === String(user?._id),
+    ) ?? null;
 
   const handleLike = () => handleToggleLike(id);
 
@@ -338,7 +343,8 @@ function RecipeDetail() {
     fetchComments();
   }, [fetchComments, recipe]);
 
-  if (loading) return <LoadingPage message="We’re bringing this recipe to the table." />;
+  if (loading)
+    return <LoadingPage message="We’re bringing this recipe to the table." />;
   if (!recipe) return <p style={{ padding: "48px" }}>Recipe not found.</p>;
 
   return (
@@ -348,7 +354,9 @@ function RecipeDetail() {
         <TopActions>
           {isOwner && (
             <>
-              <EditRecipeButton to={`/recipe/${id}/edit`}>Edit</EditRecipeButton>
+              <EditRecipeButton to={`/recipe/${id}/edit`}>
+                Edit
+              </EditRecipeButton>
               <DeleteRecipeButton onClick={() => setConfirmDelete(true)}>
                 Delete
               </DeleteRecipeButton>

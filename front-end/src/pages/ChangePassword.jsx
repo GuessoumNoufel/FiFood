@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import toast from "react-hot-toast";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/AuthContext";
 import { changePassword } from "../API/users";
 
 const Page = styled.main`
@@ -23,13 +23,18 @@ const BackLink = styled(Link)`
   font-size: 1.4rem;
   font-weight: 600;
   text-decoration: none;
-  &:hover { text-decoration: underline; }
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const Title = styled.h1`
   margin: 0 0 0.8rem;
   color: #2b2620;
-  font: 700 3rem/1.2 "Fraunces", Georgia, serif;
+  font:
+    700 3rem/1.2 "Fraunces",
+    Georgia,
+    serif;
 `;
 
 const Intro = styled.p`
@@ -60,8 +65,12 @@ const Input = styled.input`
   outline: none;
   background: #fff;
   color: #2b2620;
-  font: 1.4rem "Inter", sans-serif;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  font:
+    1.4rem "Inter",
+    sans-serif;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 
   &:focus {
     border-color: #c1592a;
@@ -91,7 +100,10 @@ const Submit = styled.button`
   font-size: 1.4rem;
   font-weight: 650;
   cursor: pointer;
-  &:disabled { opacity: 0.6; cursor: wait; }
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
 `;
 
 const Cancel = styled(Link)`
@@ -101,7 +113,9 @@ const Cancel = styled(Link)`
   color: #4a4238;
   font-size: 1.4rem;
   text-decoration: none;
-  &:hover { background: #f8f1e7; }
+  &:hover {
+    background: #f8f1e7;
+  }
 `;
 
 function ChangePassword() {

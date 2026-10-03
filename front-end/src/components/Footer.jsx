@@ -397,7 +397,7 @@ import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import toast from "react-hot-toast";
 import { subscribeToNewsletter } from "../API/newsletter";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/AuthContext";
 
 // Links with to: "#" are placeholders for pages that don't exist yet —
 // swap them for real routes as you build them. Real routes assumed:
@@ -595,9 +595,7 @@ export default function Footer() {
         </Grid>
 
         <Bottom>
-          <Copy>
-            © {new Date().getFullYear()} FiFood. All rights reserved.
-          </Copy>
+          <Copy>© {new Date().getFullYear()} FiFood. All rights reserved.</Copy>
           <Legal>
             <FooterLink to="#">Privacy Policy</FooterLink>
             <FooterLink to="#">Terms of Service</FooterLink>
@@ -781,9 +779,11 @@ const ColTitle = styled.h4`
   color: #fbf6ec;
 `;
 
-const FooterLink = styled(Link).attrs({ onClick: (event) => {
-  if (!event.currentTarget.getAttribute("href")?.includes("#")) scrollToTop();
-} })`
+const FooterLink = styled(Link).attrs({
+  onClick: (event) => {
+    if (!event.currentTarget.getAttribute("href")?.includes("#")) scrollToTop();
+  },
+})`
   color: #a89d8c;
   text-decoration: none;
   font-size: 0.95rem;

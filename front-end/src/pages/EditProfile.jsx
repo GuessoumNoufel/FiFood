@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import toast from "react-hot-toast";
 import { getUserProfile, updateMe } from "../API/users";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/AuthContext";
 import { countries } from "../data/countries";
 
 const BIO_LIMIT = 250;
@@ -256,7 +256,7 @@ function EditProfile() {
       navigate(`/profile/${user._id}`);
     } catch (err) {
       toast.error("Could not update profile");
-      console.log(err)
+      console.log(err);
     }
   };
 

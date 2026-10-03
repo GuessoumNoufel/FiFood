@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import toast from "react-hot-toast";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/AuthContext";
 import { getUserFollowers, getUserFollowing, toggleFollow } from "../API/users";
 
 const Overlay = styled.div`
@@ -140,7 +140,10 @@ const FollowButton = styled.button`
     background: ${(props) => (props.$following ? "#fff2ec" : "#a9471f")};
     border-color: ${(props) => (props.$following ? "#e6c4b1" : "#a9471f")};
   }
-  &:disabled { opacity: 0.55; cursor: wait; }
+  &:disabled {
+    opacity: 0.55;
+    cursor: wait;
+  }
 `;
 
 const LoginLink = styled(Link)`
@@ -265,7 +268,9 @@ function FollowListModal({ userId, type, onClose }) {
                 </PersonLink>
                 {currentUser ? (
                   person._id === currentUser._id ? (
-                    <FollowButton type="button" disabled>You</FollowButton>
+                    <FollowButton type="button" disabled>
+                      You
+                    </FollowButton>
                   ) : (
                     <FollowButton
                       type="button"

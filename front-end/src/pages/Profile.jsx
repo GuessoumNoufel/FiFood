@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { getUserProfile, getUserRecipes, toggleFollow } from "../API/users";
 import { getFavorites } from "../API/likes";
 import RecipeCard from "../components/RecipeCard";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/AuthContext";
 import { isCacheFresh } from "../utils/cache";
 import { useLikedRecipes } from "../hooks/useLikedRecipes";
 import LoadingPage from "../components/LoadingPage";
@@ -87,8 +87,14 @@ const ClickableStat = styled.button`
   font: inherit;
   text-align: center;
   cursor: pointer;
-  &:hover > div:first-child { color: #c1592a; }
-  &:focus-visible { outline: 2px solid #c1592a; outline-offset: 4px; border-radius: 4px; }
+  &:hover > div:first-child {
+    color: #c1592a;
+  }
+  &:focus-visible {
+    outline: 2px solid #c1592a;
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
 `;
 
 const StatValue = styled.div`
@@ -209,7 +215,10 @@ const NotFoundCode = styled.p`
 const NotFoundTitle = styled.h1`
   margin: 0 0 1.2rem;
   color: #2b2620;
-  font: 700 3.6rem/1.15 "Fraunces", Georgia, serif;
+  font:
+    700 3.6rem/1.15 "Fraunces",
+    Georgia,
+    serif;
 `;
 
 const NotFoundMessage = styled.p`
@@ -229,7 +238,9 @@ const HomeButton = styled(Link)`
   font-weight: 600;
   text-decoration: none;
 
-  &:hover { background: #a9471f; }
+  &:hover {
+    background: #a9471f;
+  }
 `;
 
 const fakeRating = () => (Math.random() * (4.9 - 4.0) + 4.0).toFixed(1);
@@ -242,13 +253,14 @@ function Profile() {
   const isMe = me && me._id === id;
   const profileCacheKey = `${id}:${me?._id ?? "public"}`;
   const cachedProfile = profileCache.get(profileCacheKey);
-  const cachedData =
-    isCacheFresh(cachedProfile, PROFILE_CACHE_TTL)
-      ? cachedProfile
-      : null;
+  const cachedData = isCacheFresh(cachedProfile, PROFILE_CACHE_TTL)
+    ? cachedProfile
+    : null;
 
   const [profile, setProfile] = useState(cachedData?.profile ?? null);
-  const [recipesCount, setRecipesCount] = useState(cachedData?.recipesCount ?? 0);
+  const [recipesCount, setRecipesCount] = useState(
+    cachedData?.recipesCount ?? 0,
+  );
   const [recipes, setRecipes] = useState(cachedData?.recipes ?? []);
   const [favorites, setFavorites] = useState([]);
   const [following, setFollowing] = useState(
@@ -331,8 +343,7 @@ function Profile() {
           profile: {
             ...cached.profile,
             amFollowing: isFollowing,
-            followersCount:
-              followersCount ?? cached.profile.followersCount,
+            followersCount: followersCount ?? cached.profile.followersCount,
           },
           cachedAt: Date.now(),
         });

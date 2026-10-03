@@ -2,8 +2,8 @@ import { Link } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
 
 // import indianImg from "../assets/cuisine-imgs/Indian.png";
-import italianImg from "../assets/cuisine-imgs/Italian.png";
-import algerianImg from "../assets/cuisine-imgs/algerian.png";
+import italianImg from "../assets/cuisine-imgs/italian.png";
+import algerianImg from "../assets/cuisine-imgs/Algerian.png";
 import japaneseImg from "../assets/cuisine-imgs/Japanese.png";
 import mexicanImg from "../assets/cuisine-imgs/Mexican.png";
 import chineseImg from "../assets/cuisine-imgs/Chinese.png";

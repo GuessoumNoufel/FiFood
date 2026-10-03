@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { getFeaturedUsers } from "../API/users";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/AuthContext";
 import { useContext } from "react";
 
 // Uses the "Caveat" Google Font for the script-style heading/names — add it

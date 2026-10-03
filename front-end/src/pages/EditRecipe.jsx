@@ -3,7 +3,7 @@ import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import toast from "react-hot-toast";
 import { getRecipe, updateRecipe } from "../API/recipes";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/AuthContext";
 import LoadingPage from "../components/LoadingPage";
 
 const Page = styled.main`
@@ -15,7 +15,9 @@ const Page = styled.main`
   background: #fffdf9;
   box-shadow: 0 1.8rem 5rem rgba(43, 38, 32, 0.07);
   font-family: "Inter", sans-serif;
-  @media (max-width: 640px) { padding: 2rem; }
+  @media (max-width: 640px) {
+    padding: 2rem;
+  }
 `;
 
 const BackLink = styled(Link)`
@@ -25,13 +27,18 @@ const BackLink = styled(Link)`
   font-size: 1.4rem;
   font-weight: 600;
   text-decoration: none;
-  &:hover { text-decoration: underline; }
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const Title = styled.h1`
   margin: 0 0 0.6rem;
   color: #2b2620;
-  font: 700 3rem/1.2 "Fraunces", Georgia, serif;
+  font:
+    700 3rem/1.2 "Fraunces",
+    Georgia,
+    serif;
 `;
 
 const Intro = styled.p`
@@ -60,9 +67,14 @@ const Input = styled.input`
   border-radius: 1rem;
   background: #fff;
   color: #2b2620;
-  font: 1.4rem "Inter", sans-serif;
+  font:
+    1.4rem "Inter",
+    sans-serif;
   outline: none;
-  &:focus { border-color: #c1592a; box-shadow: 0 0 0 3px #c1592a1f; }
+  &:focus {
+    border-color: #c1592a;
+    box-shadow: 0 0 0 3px #c1592a1f;
+  }
 `;
 
 const TextArea = styled.textarea`
@@ -74,10 +86,15 @@ const TextArea = styled.textarea`
   border-radius: 1rem;
   background: #fff;
   color: #2b2620;
-  font: 1.4rem/1.55 "Inter", sans-serif;
+  font:
+    1.4rem/1.55 "Inter",
+    sans-serif;
   outline: none;
   resize: vertical;
-  &:focus { border-color: #c1592a; box-shadow: 0 0 0 3px #c1592a1f; }
+  &:focus {
+    border-color: #c1592a;
+    box-shadow: 0 0 0 3px #c1592a1f;
+  }
 `;
 
 const Select = styled.select`
@@ -88,14 +105,19 @@ const Select = styled.select`
   border-radius: 1rem;
   background: #fff;
   color: #2b2620;
-  font: 1.4rem "Inter", sans-serif;
+  font:
+    1.4rem "Inter",
+    sans-serif;
 `;
 
 const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(${(props) => props.$cols || 2}, minmax(0, 1fr));
   gap: 1.6rem;
-  @media (max-width: 640px) { grid-template-columns: 1fr; gap: 0; }
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
 `;
 
 const ImagePicker = styled.label`
@@ -134,7 +156,10 @@ const SmallButton = styled.button`
   color: #8a7f6e;
   font-size: 1.3rem;
   cursor: pointer;
-  &:hover { background: #fff2ec; color: #a9471f; }
+  &:hover {
+    background: #fff2ec;
+    color: #a9471f;
+  }
 `;
 
 const AddButton = styled.button`
@@ -146,7 +171,9 @@ const AddButton = styled.button`
   font-size: 1.3rem;
   font-weight: 600;
   cursor: pointer;
-  &:hover { background: #fff7f0; }
+  &:hover {
+    background: #fff7f0;
+  }
 `;
 
 const Actions = styled.div`
@@ -165,7 +192,10 @@ const SaveButton = styled.button`
   font-size: 1.4rem;
   font-weight: 650;
   cursor: pointer;
-  &:disabled { opacity: 0.6; cursor: wait; }
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
 `;
 
 const CancelButton = styled(Link)`
@@ -226,7 +256,9 @@ function EditRecipe() {
         if (isCurrent) setLoading(false);
       });
 
-    return () => { isCurrent = false; };
+    return () => {
+      isCurrent = false;
+    };
   }, [id]);
 
   const isOwner =
@@ -253,11 +285,16 @@ function EditRecipe() {
     Object.entries(form).forEach(([key, value]) => formData.append(key, value));
     formData.append(
       "ingredients",
-      JSON.stringify(ingredients.map((ingredient) => ingredient.trim()).filter(Boolean)),
+      JSON.stringify(
+        ingredients.map((ingredient) => ingredient.trim()).filter(Boolean),
+      ),
     );
     formData.append(
       "instructions",
-      steps.map((step) => step.trim()).filter(Boolean).join("\n"),
+      steps
+        .map((step) => step.trim())
+        .filter(Boolean)
+        .join("\n"),
     );
 
     setSaving(true);
@@ -298,37 +335,80 @@ function EditRecipe() {
         </Field>
         <Field>
           <Label htmlFor="recipe-title">Recipe name</Label>
-          <Input id="recipe-title" name="title" value={form.title} onChange={updateField} required />
+          <Input
+            id="recipe-title"
+            name="title"
+            value={form.title}
+            onChange={updateField}
+            required
+          />
         </Field>
         <Grid $cols={2}>
           <Field>
             <Label htmlFor="recipe-category">Category</Label>
-            <Input id="recipe-category" name="category" value={form.category} onChange={updateField} />
+            <Input
+              id="recipe-category"
+              name="category"
+              value={form.category}
+              onChange={updateField}
+            />
           </Field>
           <Field>
             <Label htmlFor="recipe-area">Cuisine / area</Label>
-            <Input id="recipe-area" name="area" value={form.area} onChange={updateField} />
+            <Input
+              id="recipe-area"
+              name="area"
+              value={form.area}
+              onChange={updateField}
+            />
           </Field>
         </Grid>
         <Grid $cols={3}>
           <Field>
             <Label htmlFor="recipe-time">Cooking time (minutes)</Label>
-            <Input id="recipe-time" name="time" type="number" min="0" value={form.time} onChange={updateField} />
+            <Input
+              id="recipe-time"
+              name="time"
+              type="number"
+              min="0"
+              value={form.time}
+              onChange={updateField}
+            />
           </Field>
           <Field>
             <Label htmlFor="recipe-servings">Servings</Label>
-            <Input id="recipe-servings" name="servings" type="number" min="0" value={form.servings} onChange={updateField} />
+            <Input
+              id="recipe-servings"
+              name="servings"
+              type="number"
+              min="0"
+              value={form.servings}
+              onChange={updateField}
+            />
           </Field>
           <Field>
             <Label htmlFor="recipe-difficulty">Difficulty</Label>
-            <Select id="recipe-difficulty" name="difficulty" value={form.difficulty} onChange={updateField}>
-              <option>Easy</option><option>Medium</option><option>Hard</option>
+            <Select
+              id="recipe-difficulty"
+              name="difficulty"
+              value={form.difficulty}
+              onChange={updateField}
+            >
+              <option>Easy</option>
+              <option>Medium</option>
+              <option>Hard</option>
             </Select>
           </Field>
         </Grid>
         <Field>
           <Label htmlFor="recipe-description">Description</Label>
-          <TextArea id="recipe-description" name="description" maxLength={300} value={form.description} onChange={updateField} />
+          <TextArea
+            id="recipe-description"
+            name="description"
+            maxLength={300}
+            value={form.description}
+            onChange={updateField}
+          />
         </Field>
         <Grid $cols={2}>
           <Field>
@@ -338,14 +418,35 @@ function EditRecipe() {
                 <Input
                   aria-label={`Ingredient ${index + 1}`}
                   value={ingredient}
-                  onChange={(event) => setIngredients((items) => items.map((item, i) => i === index ? event.target.value : item))}
+                  onChange={(event) =>
+                    setIngredients((items) =>
+                      items.map((item, i) =>
+                        i === index ? event.target.value : item,
+                      ),
+                    )
+                  }
                 />
                 {ingredients.length > 1 && (
-                  <SmallButton type="button" aria-label="Remove ingredient" onClick={() => setIngredients((items) => items.filter((_, i) => i !== index))}>×</SmallButton>
+                  <SmallButton
+                    type="button"
+                    aria-label="Remove ingredient"
+                    onClick={() =>
+                      setIngredients((items) =>
+                        items.filter((_, i) => i !== index),
+                      )
+                    }
+                  >
+                    ×
+                  </SmallButton>
                 )}
               </ListRow>
             ))}
-            <AddButton type="button" onClick={() => setIngredients((items) => [...items, ""])}>+ Add ingredient</AddButton>
+            <AddButton
+              type="button"
+              onClick={() => setIngredients((items) => [...items, ""])}
+            >
+              + Add ingredient
+            </AddButton>
           </Field>
           <Field>
             <Label>Instructions</Label>
@@ -354,19 +455,40 @@ function EditRecipe() {
                 <TextArea
                   aria-label={`Instruction step ${index + 1}`}
                   value={step}
-                  onChange={(event) => setSteps((items) => items.map((item, i) => i === index ? event.target.value : item))}
+                  onChange={(event) =>
+                    setSteps((items) =>
+                      items.map((item, i) =>
+                        i === index ? event.target.value : item,
+                      ),
+                    )
+                  }
                 />
                 {steps.length > 1 && (
-                  <SmallButton type="button" aria-label="Remove step" onClick={() => setSteps((items) => items.filter((_, i) => i !== index))}>×</SmallButton>
+                  <SmallButton
+                    type="button"
+                    aria-label="Remove step"
+                    onClick={() =>
+                      setSteps((items) => items.filter((_, i) => i !== index))
+                    }
+                  >
+                    ×
+                  </SmallButton>
                 )}
               </ListRow>
             ))}
-            <AddButton type="button" onClick={() => setSteps((items) => [...items, ""])}>+ Add step</AddButton>
+            <AddButton
+              type="button"
+              onClick={() => setSteps((items) => [...items, ""])}
+            >
+              + Add step
+            </AddButton>
           </Field>
         </Grid>
         <Actions>
           <CancelButton to={`/recipe/${id}`}>Cancel</CancelButton>
-          <SaveButton type="submit" disabled={saving}>{saving ? "Saving…" : "Save changes"}</SaveButton>
+          <SaveButton type="submit" disabled={saving}>
+            {saving ? "Saving…" : "Save changes"}
+          </SaveButton>
         </Actions>
       </form>
     </Page>

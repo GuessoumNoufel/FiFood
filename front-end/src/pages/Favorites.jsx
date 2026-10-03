@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import RecipeCard from "../components/RecipeCard";
 import ConfirmModal from "../components/ConfirmModel";
 import LoadingPage from "../components/LoadingPage";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/AuthContext";
 import { isCacheFresh } from "../utils/cache";
 
 const fakeRating = () => (Math.random() * (4.9 - 4.0) + 4.0).toFixed(1);
@@ -97,10 +97,9 @@ function Favorites() {
   const { user } = useContext(AuthContext);
   const cacheKey = user?._id ?? "anonymous";
   const cachedFavorites = favoritesCache.get(cacheKey);
-  const initialFavorites =
-    isCacheFresh(cachedFavorites, FAVORITES_CACHE_TTL)
-      ? cachedFavorites.data
-      : null;
+  const initialFavorites = isCacheFresh(cachedFavorites, FAVORITES_CACHE_TTL)
+    ? cachedFavorites.data
+    : null;
   const [favorites, setFavorites] = useState(initialFavorites ?? []);
   const [loading, setLoading] = useState(!initialFavorites);
   const [activeFilter, setActiveFilter] = useState("All");

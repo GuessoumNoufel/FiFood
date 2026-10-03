@@ -18,7 +18,7 @@ import Login from "./pages/Login";
 import DiscoverFriends from "./pages/DiscoverFriends";
 import Footer from "./components/Footer";
 import About from "./pages/About";
-import { AuthContext } from "./context/authContext";
+import { AuthContext } from "./context/AuthContext";
 
 function GuestOnly({ children }) {
   const { user } = useContext(AuthContext);
@@ -42,8 +42,22 @@ function App() {
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/change-password" element={<ChangePassword />} />
-        <Route path="/login" element={<GuestOnly><Login /></GuestOnly>} />
-        <Route path="/signup" element={<GuestOnly><Signup /></GuestOnly>} />
+        <Route
+          path="/login"
+          element={
+            <GuestOnly>
+              <Login />
+            </GuestOnly>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <GuestOnly>
+              <Signup />
+            </GuestOnly>
+          }
+        />
         <Route path="/discover-friends" element={<DiscoverFriends />} />
         <Route path="/oauth-success" element={<OAuthSuccess />} />
       </Routes>

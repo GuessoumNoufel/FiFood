@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import styled from "styled-components";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/AuthContext";
 import {
   getComments,
   deleteComment,

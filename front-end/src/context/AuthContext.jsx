@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../API/axios";
 import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "./authContext";
+import { AuthContext } from "./AuthContext";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {

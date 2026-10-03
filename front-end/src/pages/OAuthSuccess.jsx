@@ -1,6 +1,6 @@
 import { useEffect, useContext, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/AuthContext";
 import { exchangeGoogleCode, getMe } from "../API/users";
 
 function OAuthSuccess() {

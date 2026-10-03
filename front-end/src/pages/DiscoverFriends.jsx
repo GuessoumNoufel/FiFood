@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { getAllUsers, toggleFollow } from "../API/users";
 import UserCard from "../components/UserCard";
 import LoadingPage from "../components/LoadingPage";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../context/AuthContext";
 import { isCacheFresh } from "../utils/cache";
 
 const FRIENDS_CACHE_TTL = 30_000;
@@ -152,10 +152,9 @@ function DiscoverFriends() {
     search.trim(),
   ]);
   const cachedFriends = friendsCache.get(cacheKey);
-  const initialFriends =
-    isCacheFresh(cachedFriends, FRIENDS_CACHE_TTL)
-      ? cachedFriends
-      : null;
+  const initialFriends = isCacheFresh(cachedFriends, FRIENDS_CACHE_TTL)
+    ? cachedFriends
+    : null;
   const [users, setUsers] = useState(initialFriends?.users ?? []);
   const [page, setPage] = useState(initialFriends?.page ?? 1);
   const [totalResults, setTotalResults] = useState(
@@ -166,11 +165,7 @@ function DiscoverFriends() {
   const loadUsers = useCallback(
     (pageToLoad, replace) => {
       const cached = friendsCache.get(cacheKey);
-      if (
-        replace &&
-        cached &&
-        isCacheFresh(cached, FRIENDS_CACHE_TTL)
-      ) {
+      if (replace && cached && isCacheFresh(cached, FRIENDS_CACHE_TTL)) {
         setUsers(cached.users);
         setPage(cached.page);
         setTotalResults(cached.totalResults);
@@ -228,7 +223,7 @@ function DiscoverFriends() {
                   res.followersCount ??
                   u.followersCount + (res.following ? 1 : -1),
               }
-          : u,
+            : u,
         ),
       );
       const cached = friendsCache.get(cacheKey);
@@ -269,18 +264,30 @@ function DiscoverFriends() {
 
       <Controls>
         <SortTabs>
-          <Tab $active={sort === "recipes"} onClick={() => { setPage(1); setSort("recipes"); }}>
+          <Tab
+            $active={sort === "recipes"}
+            onClick={() => {
+              setPage(1);
+              setSort("recipes");
+            }}
+          >
             Most Recipes
           </Tab>
           <Tab
             $active={sort === "followers"}
-            onClick={() => { setPage(1); setSort("followers"); }}
+            onClick={() => {
+              setPage(1);
+              setSort("followers");
+            }}
           >
             Most Followers
           </Tab>
           <Tab
             $active={sort === "following"}
-            onClick={() => { setPage(1); setSort("following"); }}
+            onClick={() => {
+              setPage(1);
+              setSort("following");
+            }}
           >
             Most Following
           </Tab>
@@ -289,7 +296,10 @@ function DiscoverFriends() {
           type="text"
           placeholder="Search users..."
           value={search}
-          onChange={(e) => { setPage(1); setSearch(e.target.value); }}
+          onChange={(e) => {
+            setPage(1);
+            setSearch(e.target.value);
+          }}
         />
       </Controls>
 
@@ -310,9 +320,7 @@ function DiscoverFriends() {
           </Grid>
 
           {hasMore && (
-            <ShowMoreButton onClick={handleShowMore}>
-              Show more
-            </ShowMoreButton>
+            <ShowMoreButton onClick={handleShowMore}>Show more</ShowMoreButton>
           )}
         </div>
 
@@ -320,7 +328,10 @@ function DiscoverFriends() {
           <FilterTitle>Filter By</FilterTitle>
           <FilterOption
             $active={filter === "all"}
-            onClick={() => { setPage(1); setFilter("all"); }}
+            onClick={() => {
+              setPage(1);
+              setFilter("all");
+            }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -340,7 +351,10 @@ function DiscoverFriends() {
           </FilterOption>
           <FilterOption
             $active={filter === "following"}
-            onClick={() => { setPage(1); setFilter("following"); }}
+            onClick={() => {
+              setPage(1);
+              setFilter("following");
+            }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -365,7 +379,10 @@ function DiscoverFriends() {
           </FilterOption>
           <FilterOption
             $active={filter === "followers"}
-            onClick={() => { setPage(1); setFilter("followers"); }}
+            onClick={() => {
+              setPage(1);
+              setFilter("followers");
+            }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

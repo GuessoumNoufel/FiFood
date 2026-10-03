@@ -1,5 +1,5 @@
-import italianImg from "../assets/cuisine-imgs/Italian.png";
-// import frenchImg from "../assets/cuisine-imgs/French.png";
+import italianImg from "../assets/cuisine-imgs/italian.png";
+// import frenchImg from "../assets/cuisine-imgs/french.png";
 import japaneseImg from "../assets/cuisine-imgs/Japanese.png";
 // import indianImg from "../assets/cuisine-imgs/Indian.png";
 import mexicanImg from "../assets/cuisine-imgs/Mexican.png";
