@@ -1,6 +1,6 @@
 const multer = require("multer");
 const cloudinary = require("./cloudinaryConfig");
-const AppError = require("./AppError");
+const AppError = require("./appError");
 const { Readable } = require("stream");
 
 const multerFilter = (req, file, cb) => {
@@ -20,22 +20,35 @@ const upload = multer({
 function hasValidSignature(file) {
   const data = file.buffer;
   if (file.mimetype === "image/jpeg") {
-    return data.length >= 3 && data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff;
+    return (
+      data.length >= 3 &&
+      data[0] === 0xff &&
+      data[1] === 0xd8 &&
+      data[2] === 0xff
+    );
   }
   if (file.mimetype === "image/png") {
-    return data.length >= 8 && data.subarray(0, 8).equals(Buffer.from("89504e470d0a1a0a", "hex"));
+    return (
+      data.length >= 8 &&
+      data.subarray(0, 8).equals(Buffer.from("89504e470d0a1a0a", "hex"))
+    );
   }
   if (file.mimetype === "image/webp") {
-    return data.length >= 12 &&
+    return (
+      data.length >= 12 &&
       data.toString("ascii", 0, 4) === "RIFF" &&
-      data.toString("ascii", 8, 12) === "WEBP";
+      data.toString("ascii", 8, 12) === "WEBP"
+    );
   }
   return false;
 }
 
 function uploadToCloudinary(file) {
   if (!hasValidSignature(file)) {
-    throw new AppError("The uploaded file is not a valid JPEG, PNG or WebP image", 400);
+    throw new AppError(
+      "The uploaded file is not a valid JPEG, PNG or WebP image",
+      400,
+    );
   }
 
   return new Promise((resolve, reject) => {
@@ -47,7 +60,8 @@ function uploadToCloudinary(file) {
       },
       (error, result) => {
         if (error) return reject(error);
-        if (!result?.secure_url) return reject(new Error("Image upload did not return a secure URL"));
+        if (!result?.secure_url)
+          return reject(new Error("Image upload did not return a secure URL"));
         file.path = result.secure_url;
         file.filename = result.public_id;
         resolve();
