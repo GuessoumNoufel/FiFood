@@ -1,31 +1,47 @@
 const Recipe = require("../models/recipeModel");
-const AppError = require("./../utils/AppError");
+const AppError = require("./../utils/appError");
 const catchAsync = require("./../utils/catchAsync");
 const { notifyFollowersOfNewRecipe } = require("../utils/newsletterService");
 const { createRecipeNotifications } = require("../utils/inAppNotifications");
 
 exports.getAllRecipes = catchAsync(async (req, res, next) => {
-  const allowedFilters = ["title", "category", "area", "createdBy", "difficulty"];
+  const allowedFilters = [
+    "title",
+    "category",
+    "area",
+    "createdBy",
+    "difficulty",
+  ];
   const queryObj = {};
   for (const field of allowedFilters) {
     const value = req.query[field];
-    if (typeof value === "string" && value.length <= 200) queryObj[field] = value;
+    if (typeof value === "string" && value.length <= 200)
+      queryObj[field] = value;
   }
 
   let query = Recipe.find(queryObj);
-  const sortFields = new Set(["createdAt", "averageRating", "likesCount", "time", "title"]);
-  const sortValue = typeof req.query.sort === "string" ? req.query.sort : "-createdAt";
+  const sortFields = new Set([
+    "createdAt",
+    "averageRating",
+    "likesCount",
+    "time",
+    "title",
+  ]);
+  const sortValue =
+    typeof req.query.sort === "string" ? req.query.sort : "-createdAt";
   const sortField = sortValue.startsWith("-") ? sortValue.slice(1) : sortValue;
   query = query.sort(sortFields.has(sortField) ? sortValue : "-createdAt");
 
   const parsedPage = Number.parseInt(req.query.page, 10);
   const parsedLimit = Number.parseInt(req.query.limit, 10);
-  const page = Number.isSafeInteger(parsedPage) && parsedPage > 0
-    ? Math.min(parsedPage, 10_000)
-    : 1;
-  const limit = Number.isSafeInteger(parsedLimit) && parsedLimit > 0
-    ? Math.min(parsedLimit, 100)
-    : 10;
+  const page =
+    Number.isSafeInteger(parsedPage) && parsedPage > 0
+      ? Math.min(parsedPage, 10_000)
+      : 1;
+  const limit =
+    Number.isSafeInteger(parsedLimit) && parsedLimit > 0
+      ? Math.min(parsedLimit, 100)
+      : 10;
   const skip = (page - 1) * limit;
 
   query = query.skip(skip).limit(limit);

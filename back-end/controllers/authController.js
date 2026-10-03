@@ -1,11 +1,15 @@
 const JWT = require("jsonwebtoken");
 const User = require("./../models/userModel");
-const AppError = require("./../utils/AppError");
+const AppError = require("./../utils/appError");
 const catchAsync = require("./../utils/catchAsync");
 const { promisify } = require("util");
 const crypto = require("crypto");
 const GoogleLoginCode = require("../models/GoogleLoginCode");
-const { setAuthCookie, clearAuthCookie, getAuthToken } = require("../utils/authCookie");
+const {
+  setAuthCookie,
+  clearAuthCookie,
+  getAuthToken,
+} = require("../utils/authCookie");
 
 exports.signup = async function (req, res, next) {
   try {
@@ -17,9 +21,13 @@ exports.signup = async function (req, res, next) {
       country: req.body.country,
     });
 
-    const token = JWT.sign({ id: newUser._id, tokenVersion: newUser.tokenVersion }, process.env.JWT_SECRET, {
-      expiresIn: "30d",
-    });
+    const token = JWT.sign(
+      { id: newUser._id, tokenVersion: newUser.tokenVersion },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "30d",
+      },
+    );
     setAuthCookie(res, token);
 
     newUser.password = undefined;
@@ -40,13 +48,20 @@ exports.login = catchAsync(async function (req, res, next) {
 
   const user = await User.findOne({ email }).select("+password +tokenVersion");
 
-  if (!user?.password || !(await user.correctPassword(password, user.password))) {
+  if (
+    !user?.password ||
+    !(await user.correctPassword(password, user.password))
+  ) {
     return next(new AppError("Incorrect email or password!", 400));
   }
 
-  const token = JWT.sign({ id: user.id, tokenVersion: user.tokenVersion }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
-  });
+  const token = JWT.sign(
+    { id: user.id, tokenVersion: user.tokenVersion },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "30d",
+    },
+  );
   setAuthCookie(res, token);
 
   res.status(200).json({
@@ -101,7 +116,9 @@ exports.protect = catchAsync(async function (req, res, next) {
   }
 
   if (decoded.tokenVersion !== user.tokenVersion) {
-    return next(new AppError("Your session has ended. Please log in again", 401));
+    return next(
+      new AppError("Your session has ended. Please log in again", 401),
+    );
   }
 
   if (user.changedPasswordAfter(decoded.iat)) {
@@ -152,7 +169,10 @@ exports.googleCallback = catchAsync(async (req, res) => {
     user: req.user._id,
     expiresAt: new Date(Date.now() + 60_000),
   });
-  const clientUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
+  const clientUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(
+    /\/$/,
+    "",
+  );
   res.redirect(`${clientUrl}/oauth-success?code=${code}`);
 });
 

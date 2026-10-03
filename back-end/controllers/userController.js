@@ -1,7 +1,7 @@
 const filteredObj = require("./../utils/filterObj");
 const JWT = require("jsonwebtoken");
 const User = require("./../models/userModel");
-const AppError = require("./../utils/AppError");
+const AppError = require("./../utils/appError");
 const catchAsync = require("./../utils/catchAsync");
 const Recipe = require("../models/recipeModel");
 const mongoose = require("mongoose");
@@ -68,7 +68,9 @@ exports.updatePassword = catchAsync(async function (req, res, next) {
     );
   }
 
-  const user = await User.findById({ _id: req.user._id }).select("+password +tokenVersion");
+  const user = await User.findById({ _id: req.user._id }).select(
+    "+password +tokenVersion",
+  );
   if (!user.password) {
     return next(
       new AppError(
@@ -89,9 +91,13 @@ exports.updatePassword = catchAsync(async function (req, res, next) {
   user.tokenVersion = (user.tokenVersion ?? 0) + 1;
   await user.save();
 
-  const token = JWT.sign({ id: user._id, tokenVersion: user.tokenVersion }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
-  });
+  const token = JWT.sign(
+    { id: user._id, tokenVersion: user.tokenVersion },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "30d",
+    },
+  );
   setAuthCookie(res, token);
   res.status(200).json({
     status: "success",
@@ -112,9 +118,7 @@ exports.getUserProfile = catchAsync(async (req, res, next) => {
   delete profile.followers;
   delete profile.following;
   profile.amFollowing = Boolean(
-    req.user?.following.some((followingId) =>
-      followingId.equals(user._id),
-    ),
+    req.user?.following.some((followingId) => followingId.equals(user._id)),
   );
 
   res.status(200).json({
@@ -230,9 +234,10 @@ exports.toggleFollow = catchAsync(async (req, res, next) => {
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   const { sort = "recipes", filter = "all", search } = req.query;
   const requestedPage = Number.parseInt(req.query.page, 10);
-  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0
-    ? Math.min(requestedPage, 10_000)
-    : 1;
+  const page =
+    Number.isSafeInteger(requestedPage) && requestedPage > 0
+      ? Math.min(requestedPage, 10_000)
+      : 1;
   const limit = 10;
   const skip = (page - 1) * limit;
 
@@ -247,7 +252,10 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
   }
 
   if (typeof search === "string" && search.trim()) {
-    const safeSearch = search.trim().slice(0, 100).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const safeSearch = search
+      .trim()
+      .slice(0, 100)
+      .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     query.name = { $regex: safeSearch, $options: "i" };
   }
 
@@ -347,4 +355,3 @@ exports.getFeaturedUsers = catchAsync(async (req, res, next) => {
     data: ordered,
   });
 });
-

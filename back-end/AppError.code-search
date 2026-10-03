@@ -1,0 +1,281 @@
+# Query: AppError
+# Flags: CaseSensitive
+# ContextLines: 1
+
+72 results - 11 files
+
+back-end\.env:
+  19  EMAIL_PASSWORD=woqcgtxccddrfokj
+  20: utils/appError
+  21  API_URL=http://localhost:3000/api/v1
+
+back-end\controllers\authController.js:
+    2  const User = require("./../models/userModel");
+    3: const appError = require("./../utils/appError");
+    4  const catchAsync = require("./../utils/catchAsync");
+
+   34    if (!req.body.email || !req.body.password) {
+   35:     return next(new appError("Please provide email and password", 400));
+   36    }
+
+   43    if (!user?.password || !(await user.correctPassword(password, user.password))) {
+   44:     return next(new appError("Incorrect email or password!", 400));
+   45    }
+
+   81      return next(
+   82:       new appError("You are not logged in! Please log in to get access", 401),
+   83      );
+
+   89    } catch (err) {
+   90:     return next(new appError("Invalid token! Please log in again", 401));
+   91    }
+
+   95      return next(
+   96:       new appError(
+   97          "The user belonging to this token does no longer exist",
+
+  103    if (decoded.tokenVersion !== user.tokenVersion) {
+  104:     return next(new appError("Your session has ended. Please log in again", 401));
+  105    }
+
+  108      return next(
+  109:       new appError(
+  110          "User recently changed their password! Please log in again",
+
+  161    if (!/^[a-f0-9]{64}$/.test(code)) {
+  162:     return next(new appError("Google sign-in code is invalid or expired", 401));
+  163    }
+
+  169    if (!ticket) {
+  170:     return next(new appError("Google sign-in code is invalid or expired", 401));
+  171    }
+
+  173    const user = await User.findById(ticket.user).select("+tokenVersion");
+  174:   if (!user) return next(new appError("Account no longer exists", 401));
+  175  
+
+back-end\controllers\commentController.js:
+    2  const Comment = require("../models/commentsModel");
+    3: const appError = require("../utils/appError");
+    4  const { isLocalRecipeId } = require("../utils/isLocalId");
+
+    9    if (!text || text.length > 2000) {
+   10:     return next(new appError("Comment must be between 1 and 2000 characters", 400));
+   11    }
+
+   43    if (!text || text.length > 2000) {
+   44:     return next(new appError("Comment must be between 1 and 2000 characters", 400));
+   45    }
+
+   48    if (!comment) {
+   49:     return next(new appError("No comment found with that ID", 404));
+   50    }
+
+   52    if (comment.user.toString() !== req.user._id.toString()) {
+   53:     return next(new appError("You are not allowed to edit this comment", 403));
+   54    }
+
+   70    if (!comment) {
+   71:     return next(new appError("No comment found with that ID", 404));
+   72    }
+
+   75      return next(
+   76:       new appError("You are not allowed to delete this comment", 403),
+   77      );
+
+  119    if (!updatedComment) {
+  120:     return next(new appError("No comment found with that ID", 404));
+  121    }
+
+back-end\controllers\likeController.js:
+    5  const { fetchMealById } = require("./../utils/mealDB_API");
+    6: const appError = require("./../utils/appError");
+    7  
+
+   29      if (!recipe) {
+   30:       return next(new appError("no recipe with this id", 404));
+   31      }
+
+   44      if (!recipe) {
+   45:       return next(new appError("no recipe with this id", 404));
+   46      }
+
+  103  //     if (!deleted) {
+  104: //       return next(new appError("no recipe with this id ", 403));
+  105  //     } else mssg = "liked deleted";
+
+  112  //     if (!deleted) {
+  113: //       return next(new appError("no recipe with this id ", 403));
+  114  //     } else {
+
+  128  //     } else {
+  129: //       return next(new appError("no recipe with this id ", 403));
+  130  //     }
+
+  137  //     } else {
+  138: //       return next(new appError("no recipe with this id ", 403));
+  139  //     }
+
+back-end\controllers\mealAPI_controllers.js:
+    1  const catchAsync = require("./../utils/catchAsync");
+    2: const appError = require("./../utils/appError");
+    3  const axios = require("axios");
+
+   92    const meal = await fetchMealById(req.params.id);
+   93:   if (!meal) return next(new appError("No meal found with that ID", 404));
+   94    res.status(200).json({ status: "success", data: meal });
+
+   98  //   const meals = await searchMealsByName(req.params.name);
+   99: //   if (!meals) return next(new appError("No meals found with that name", 404));
+  100  //   res
+
+  107    if (!meals) {
+  108:     return next(new appError("No meals found with that name", 404));
+  109    }
+
+  136    const meals = await filterMealsByArea(req.params.area);
+  137:   if (!meals) return next(new appError("No meals found in that area", 404));
+  138    res
+
+back-end\controllers\newsletterController.js:
+   4  const catchAsync = require("../utils/catchAsync"); // adjust to your paths
+   5: const appError = require("../utils/appError");
+   6  const { sendEmail } = require("../utils/email");
+
+  26    if (!validator.isEmail(email)) {
+  27:     return next(new appError("Please enter a valid email address", 400));
+  28    }
+
+back-end\controllers\notificationController.js:
+   1  const Notification = require("../models/notificationModel");
+   2: const appError = require("../utils/appError");
+   3  const catchAsync = require("../utils/catchAsync");
+
+  26      });
+  27:     if (!existing) return next(new appError("Notification not found", 404));
+  28    }
+
+back-end\controllers\recipeController.js:
+    1  const Recipe = require("../models/recipeModel");
+    2: const appError = require("./../utils/appError");
+    3  const catchAsync = require("./../utils/catchAsync");
+
+   47    if (!recipe) {
+   48:     return next(new appError("No recipe found with that ID", 404));
+   49    }
+
+   77    if (!req.file) {
+   78:     return next(new appError("Please upload a recipe image", 400));
+   79    }
+
+   96        } catch {
+   97:         throw new appError("Ingredients must be a valid list", 400);
+   98        }
+
+  110    if (!recipe) {
+  111:     return next(new appError("No recipe found with that ID", 404));
+  112    }
+
+  114    if (recipe.createdBy.toString() !== req.user.id) {
+  115:     return next(new appError("You are not allowed to edit this recipe", 403));
+  116    }
+
+  142      } catch {
+  143:       return next(new appError("Ingredients must be a valid list", 400));
+  144      }
+  145      if (!Array.isArray(updates.ingredients)) {
+  146:       return next(new appError("Ingredients must be a valid list", 400));
+  147      }
+
+  166    if (!recipe) {
+  167:     return next(new appError("No recipe found with that ID", 404));
+  168    }
+
+  170    if (recipe.createdBy.toString() !== req.user.id) {
+  171:     return next(new appError("You are not allowed to delete this recipe", 403));
+  172    }
+
+  185    if (!recipe) {
+  186:     return next(new appError("Recipe not found", 404));
+  187    }
+
+  192    if (!Number.isInteger(numericValue) || numericValue < 1 || numericValue > 5) {
+  193:     return next(new appError("Please provide a rating between 1 and 5", 400));
+  194    }
+
+back-end\controllers\userController.js:
+    3  const User = require("./../models/userModel");
+    4: const appError = require("./../utils/appError");
+    5  const catchAsync = require("./../utils/catchAsync");
+
+   12      return next(
+   13:       new appError(
+   14          "This route is not for password updates. Use /updatePassword.",
+
+   53      return next(
+   54:       new appError(
+   55          "Please provide your current password, new password and confirm new password",
+
+   61    if (req.body.newPassword !== req.body.newPasswordConfirm) {
+   62:     return next(new appError("The new passwords do not match", 400));
+   63    }
+
+   66      return next(
+   67:       new appError("The new password must be between 8 and 40 characters", 400),
+   68      );
+
+   73      return next(
+   74:       new appError(
+   75          "This account does not have a password. Use your sign-in provider to manage it.",
+
+   84    if (!correctPassword) {
+   85:     return next(new appError("Your current password is incorrect", 401));
+   86    }
+
+  105    );
+  106:   if (!user) return next(new appError("No user found with that ID", 404));
+  107  
+
+  129      .populate("followers", "name photo");
+  130:   if (!user) return next(new appError("No user found with that ID", 404));
+  131  
+
+  145      .populate("following", "name photo");
+  146:   if (!user) return next(new appError("No user found with that ID", 404));
+  147  
+
+  161    );
+  162:   if (!recipes) return next(new appError("no recipe found!", 404));
+  163    res
+
+  171    if (targetId === req.user.id) {
+  172:     return next(new appError("You cannot follow yourself", 400));
+  173    }
+
+  175    if (!mongoose.Types.ObjectId.isValid(targetId)) {
+  176:     return next(new appError("No user found with that ID", 404));
+  177    }
+
+  186        ]);
+  187:       if (!target) throw new appError("No user found with that ID", 404);
+  188  
+
+back-end\utils\appError.js:
+   1: class appError extends Error {
+   2    constructor(message, statusCode) {
+
+  10  }
+  11: module.exports = appError;
+
+back-end\utils\multerConfig.js:
+   2  const cloudinary = require("./cloudinaryConfig");
+   3: const appError = require("./appError");
+   4  const { Readable } = require("stream");
+
+   9    } else {
+  10:     cb(new appError("Not an image! Please upload only images.", 400), false);
+  11    }
+
+  37    if (!hasValidSignature(file)) {
+  38:     throw new appError("The uploaded file is not a valid JPEG, PNG or WebP image", 400);
+  39    }

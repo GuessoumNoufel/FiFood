@@ -1,5 +1,5 @@
 const catchAsync = require("./../utils/catchAsync");
-const AppError = require("./../utils/AppError");
+const AppError = require("./../utils/appError");
 const axios = require("axios");
 const Like = require("../models/likesModel");
 const { fetchMealById } = require("./../utils/mealDB_API");
