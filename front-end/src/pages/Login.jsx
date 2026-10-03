@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 // import styled from "styled-components";
 import toast from "react-hot-toast";
 import { login as loginApi } from "../API/auth";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContextObject";
 import GoogleButton from "../components/GoogleButton";
 
 import {

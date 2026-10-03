@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { getUserProfile, getUserRecipes, toggleFollow } from "../API/users";
 import { getFavorites } from "../API/likes";
 import RecipeCard from "../components/RecipeCard";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContextObject";
 import { isCacheFresh } from "../utils/cache";
 import { useLikedRecipes } from "../hooks/useLikedRecipes";
 import LoadingPage from "../components/LoadingPage";

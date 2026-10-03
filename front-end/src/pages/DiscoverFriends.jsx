@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { getAllUsers, toggleFollow } from "../API/users";
 import UserCard from "../components/UserCard";
 import LoadingPage from "../components/LoadingPage";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContextObject";
 import { isCacheFresh } from "../utils/cache";
 
 const FRIENDS_CACHE_TTL = 30_000;

@@ -397,7 +397,7 @@ import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import toast from "react-hot-toast";
 import { subscribeToNewsletter } from "../API/newsletter";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContextObject";
 
 // Links with to: "#" are placeholders for pages that don't exist yet —
 // swap them for real routes as you build them. Real routes assumed:

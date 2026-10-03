@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import toast from "react-hot-toast";
 import { getUserProfile, updateMe } from "../API/users";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContextObject";
 import { countries } from "../data/countries";
 
 const BIO_LIMIT = 250;

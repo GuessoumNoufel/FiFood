@@ -6,7 +6,7 @@ import { getMealById } from "../API/meals";
 // import { toggleLike } from "../API/likes";
 import { isLocalRecipeId } from "../utils/isLocalId";
 // import { isLocalRecipeId } from "../utils/isLocalId";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContextObject";
 import toast from "react-hot-toast";
 import { useLikedRecipes } from "../hooks/useLikedRecipes";
 import { getFavorites } from "../API/likes";

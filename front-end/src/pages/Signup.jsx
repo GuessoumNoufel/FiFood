@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { signup as signupApi } from "../API/auth";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContextObject";
 import GoogleButton from "../components/GoogleButton";
 import styled from "styled-components";
 import signupBackground from "../assets/signup.png";

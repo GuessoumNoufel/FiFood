@@ -18,7 +18,7 @@ import Login from "./pages/Login";
 import DiscoverFriends from "./pages/DiscoverFriends";
 import Footer from "./components/Footer";
 import About from "./pages/About";
-import { AuthContext } from "./context/AuthContext";
+import { AuthContext } from "./context/AuthContextObject";
 
 function GuestOnly({ children }) {
   const { user } = useContext(AuthContext);

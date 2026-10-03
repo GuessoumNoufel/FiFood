@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import RecipeCard from "../components/RecipeCard";
 import ConfirmModal from "../components/ConfirmModel";
 import LoadingPage from "../components/LoadingPage";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContextObject";
 import { isCacheFresh } from "../utils/cache";
 
 const fakeRating = () => (Math.random() * (4.9 - 4.0) + 4.0).toFixed(1);
