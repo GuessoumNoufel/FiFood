@@ -9,6 +9,9 @@ const GoogleLoginCode = require("./models/GoogleLoginCode");
 const Like = require("./models/likesModel");
 const port = process.env.PORT || 8000;
 
+// if (process.env.NODE_ENV !== "production") {
+//   require("dns").setServers(["8.8.8.8", "1.1.1.1"]);
+// }
 if (!process.env.DATA_BASE) {
   throw new Error("DATA_BASE must be configured before starting FiFood");
 }

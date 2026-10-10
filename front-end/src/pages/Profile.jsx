@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { getUserProfile, getUserRecipes, toggleFollow } from "../API/users";
 import { getFavorites } from "../API/likes";
 import RecipeCard from "../components/RecipeCard";
+import { getUserRatings } from "../API/recipes";
 import { AuthContext } from "../context/AuthContextObject";
 import { isCacheFresh } from "../utils/cache";
 import { useLikedRecipes } from "../hooks/useLikedRecipes";
@@ -191,6 +192,115 @@ const Empty = styled.p`
   padding: 40px 32px;
 `;
 
+const RatingsWrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px 32px 0;
+`;
+
+const RatingLink = styled(Link)`
+  text-decoration: none;
+  color: inherit;
+`;
+
+const RatingCard = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fffdfb;
+  border: 1px solid #e8e0d4;
+  border-radius: 16px;
+  padding: 14px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(43, 38, 32, 0.08);
+  }
+`;
+
+const RatingImage = styled.img`
+  width: 92px;
+  height: 92px;
+  object-fit: cover;
+  border-radius: 12px;
+  flex-shrink: 0;
+  background: #f3ede1;
+`;
+
+const RatingBody = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const RatingTopRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 6px;
+`;
+
+const RatingTitle = styled.h3`
+  margin: 0;
+  font-size: 16px;
+  color: #2b2620;
+  font-weight: 700;
+`;
+
+const RatingBadge = styled.span`
+  background: #fff1e6;
+  color: #c1592a;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 700;
+`;
+
+const RatingMeta = styled.p`
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #8a7f6e;
+`;
+
+const RatingComment = styled.p`
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #4a4238;
+  word-break: break-word;
+`;
+
+const RatingCommentMuted = styled.p`
+  margin: 0;
+  font-size: 13px;
+  color: #9b907f;
+`;
+
+const ArrowIcon = styled.span`
+  font-size: 22px;
+  color: #c1592a;
+  font-weight: 700;
+`;
+
+const ShowMoreButton = styled.button`
+  align-self: center;
+  border: 1px solid #e8e0d4;
+  background: #fff;
+  color: #4a4238;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+
+  &:hover {
+    background: #f5efe4;
+  }
+`;
+
 const NotFoundPage = styled.main`
   min-height: 55vh;
   display: grid;
@@ -266,6 +376,8 @@ function Profile() {
   const [following, setFollowing] = useState(
     cachedData?.profile?.amFollowing ?? false,
   );
+  const [userRatings, setUserRatings] = useState([]);
+  const [ratingsVisibleCount, setRatingsVisibleCount] = useState(10);
   const [followListType, setFollowListType] = useState(null);
   const [activeTab, setActiveTab] = useState("recipes");
   const [loading, setLoading] = useState(!cachedData);
@@ -331,6 +443,22 @@ function Profile() {
       })
       .catch(() => setFavorites([]));
   }, [isMe, setLikedIds]);
+
+  useEffect(() => {
+    if (!isMe || !id) {
+      setUserRatings([]);
+      setRatingsVisibleCount(10);
+      return;
+    }
+
+    getUserRatings(id)
+      .then((res) => {
+        setUserRatings(res.data ?? []);
+      })
+      .catch(() => {
+        setUserRatings([]);
+      });
+  }, [id, isMe]);
 
   useEffect(() => {
     const syncFollowChange = (event) => {
@@ -598,7 +726,47 @@ function Profile() {
         ))}
 
       {activeTab === "ratings" && (
-        <Empty>You haven't rated any recipes yet.</Empty>
+        userRatings.length === 0 ? (
+          <Empty>You haven't rated any recipes yet.</Empty>
+        ) : (
+          <RatingsWrap>
+            {userRatings.slice(0, ratingsVisibleCount).map((entry) => (
+              <RatingLink key={entry._id} to={`/recipe/${entry.recipeId}`}>
+                <RatingCard>
+                  <RatingImage src={entry.image} alt={entry.title} />
+                  <RatingBody>
+                    <RatingTopRow>
+                      <RatingTitle>{entry.title}</RatingTitle>
+                      <RatingBadge>{entry.rating}/5</RatingBadge>
+                    </RatingTopRow>
+                    {entry.category && <RatingMeta>{entry.category}</RatingMeta>}
+                    {entry.comment ? (
+                      <RatingComment>
+                        “{entry.comment.text.length > 120
+                          ? `${entry.comment.text.slice(0, 120).trim()}…`
+                          : entry.comment.text}”
+                      </RatingComment>
+                    ) : (
+                      <RatingCommentMuted>No comment added</RatingCommentMuted>
+                    )}
+                  </RatingBody>
+                  <ArrowIcon>→</ArrowIcon>
+                </RatingCard>
+              </RatingLink>
+            ))}
+
+            {ratingsVisibleCount < userRatings.length && (
+              <ShowMoreButton
+                type="button"
+                onClick={() =>
+                  setRatingsVisibleCount((count) => count + 10)
+                }
+              >
+                Show more
+              </ShowMoreButton>
+            )}
+          </RatingsWrap>
+        )
       )}
       {followListType && (
         <FollowListModal

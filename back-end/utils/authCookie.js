@@ -2,15 +2,22 @@ const COOKIE_NAME = "fifood_session";
 const OAUTH_STATE_NAME = "fifood_oauth_state";
 const SESSION_MS = 30 * 24 * 60 * 60 * 1000;
 
-const sameSite = ["lax", "strict", "none"].includes(
-  (process.env.COOKIE_SAME_SITE || "lax").toLowerCase(),
-)
-  ? (process.env.COOKIE_SAME_SITE || "lax").toLowerCase()
-  : "lax";
+const resolveCookieSameSite = () => {
+  const configured = (process.env.COOKIE_SAME_SITE || "").toLowerCase();
+  if (["lax", "strict", "none"].includes(configured)) {
+    return configured;
+  }
+
+  return process.env.NODE_ENV === "production" ? "none" : "lax";
+};
+
+const resolveSecureCookie = () =>
+  process.env.NODE_ENV === "production" || resolveCookieSameSite() === "none";
+
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production" || sameSite === "none",
-  sameSite,
+  secure: resolveSecureCookie(),
+  sameSite: resolveCookieSameSite(),
   path: "/api/v1",
 };
 
@@ -33,8 +40,8 @@ exports.getAuthToken = (req) => {
 exports.setOAuthStateCookie = (res, state) => {
   res.cookie(OAUTH_STATE_NAME, state, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: resolveSecureCookie(),
+    sameSite: resolveCookieSameSite(),
     maxAge: 10 * 60 * 1000,
     path: "/api/v1/users/auth/google",
   });
@@ -53,8 +60,8 @@ exports.consumeOAuthState = (req, res) => {
 
   res.clearCookie(OAUTH_STATE_NAME, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: resolveSecureCookie(),
+    sameSite: resolveCookieSameSite(),
     path: "/api/v1/users/auth/google",
   });
   return valid;

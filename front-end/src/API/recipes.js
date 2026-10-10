@@ -3,6 +3,9 @@ import api from "./axios";
 export const getRecipe = (id) =>
   api.get(`/recipes/${id}`).then((res) => res.data);
 
+export const getUserRatings = (userId) =>
+  api.get(`/recipes/my-ratings/${userId}`).then((res) => res.data);
+
 export const createRecipe = (data) => {
   return api.post(`/recipes/createRecipe`, data).then((res) => res.data);
 };

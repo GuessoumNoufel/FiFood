@@ -8,6 +8,7 @@ const rateLimit = require("../utils/rateLimit");
 const router = express.Router();
 
 router.get("/", recipeController.getAllRecipes);
+router.get("/my-ratings/:userId", recipeController.getUserRatings);
 router.get("/:id", recipeController.getRecipe);
 
 router.use(authController.protect);

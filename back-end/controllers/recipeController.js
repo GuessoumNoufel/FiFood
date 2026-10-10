@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Recipe = require("../models/recipeModel");
 const AppError = require("./../utils/appError");
 const catchAsync = require("./../utils/catchAsync");
@@ -67,6 +68,60 @@ exports.getRecipe = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     data: recipe,
+  });
+});
+
+exports.getUserRatings = catchAsync(async (req, res, next) => {
+  const { userId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return next(new AppError("No user found with that ID", 404));
+  }
+
+  const recipes = await Recipe.find({ "ratings.user": userId })
+    .select("_id title image category averageRating ratings comments createdAt")
+    .populate("comments", "text user createdAt recipeId")
+    .sort("-createdAt");
+
+  const ratings = recipes
+    .map((recipe) => {
+      const userRating = recipe.ratings.find(
+        (entry) => entry.user && entry.user.toString() === userId,
+      );
+      if (!userRating) return null;
+
+      const userComment = recipe.comments?.find(
+        (comment) => comment.user && comment.user.toString() === userId,
+      );
+
+      return {
+        _id: `${recipe._id}:${userId}`,
+        recipeId: recipe._id,
+        title: recipe.title,
+        image: recipe.image,
+        category: recipe.category,
+        rating: userRating.value,
+        averageRating: recipe.averageRating,
+        comment: userComment
+          ? {
+              _id: userComment._id,
+              text: userComment.text,
+              createdAt: userComment.createdAt,
+            }
+          : null,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => {
+      const aTime = a.comment?.createdAt ? new Date(a.comment.createdAt).getTime() : 0;
+      const bTime = b.comment?.createdAt ? new Date(b.comment.createdAt).getTime() : 0;
+      return bTime - aTime || String(b.recipeId).localeCompare(String(a.recipeId));
+    });
+
+  res.status(200).json({
+    status: "success",
+    results: ratings.length,
+    data: ratings,
   });
 });
 
